@@ -11,6 +11,9 @@
 
 Переворот экрана не должен сбивать количество прямоугольников.
 
+<img width="418" height="795" alt="image" src="https://github.com/user-attachments/assets/4c74fe84-993b-40c1-97e8-a683597d3b98" />
+
+
 ### Ограничения и требования
 
 1. Нельзя использовать персистентное хранилище (Никаких записей в файловую систему, никаких записей в SharedPreferences).
@@ -33,3 +36,108 @@
 
 1. Прием ДЗ 1 будет на РК 1.
 2. Требуется загрузить код в git-репозиторий, чтобы было удобно его просматривать.
+
+# Отчёт 
+
+## Реализация необходимых требований
+
+### 1. Зависимость количества колонок от ориентации устройства. ✅
+```
+private const val COLUMNS_PORTRAIT = 3
+private const val COLUMNS_LANDSCAPE = 4
+```
+Храним значения как константы для читаемости кода и так как "обычно числа не хранят в ресурсас, создайте лучше константы".
+```
+val columnsCount =
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            COLUMNS_PORTRAIT
+        } else {
+            COLUMNS_LANDSCAPE
+        }
+```
+С помощью LocalConfiguration.current.orientation получаем текущую конфигурацию устройства. В зависимости от полученного значения берём из ресурсов нужное колличество колонок.
+```
+LazyVerticalGrid(
+            columns = GridCells.Fixed(columnsCount)...
+```
+Фиксируем известное число колонок на основе вычисленного значения в LazyVerticalGrid(компонент в Jetpack Compose, который отображает элементы в виде вертикально прокручиваемой сетки).
+
+### 2. Зависимость цвета объекта от отображаемого числа. ✅
+```
+{
+            items(count.intValue, key = { it }) { item ->
+                val number = item + 1
+                NumberSquare(number = number)
+            }
+```
+Создаем элементы NumberSquare сетки с помощью LazyVerticalGrid, обеспечивая стабильность ключей для анимаций, передаём соответсвующий номер(нумерация с 1).
+```
+val isEven = number % 2 == 0
+    val color = if (isEven) {
+        colorResource(id = R.color.even_color)
+    } else {
+        colorResource(id = R.color.odd_color)
+    }
+```
+В зависимости от number определяем цвет, подгружая из ресурсов.
+```
+Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.square_corner_radius)))
+            .background(color)...
+```
+Устанавливаем цвет как background элемента NumberSquare(Box).
+
+### 3. Кнопка под списком, которая не перекрывает прямоугольники при скролле списка до конца. ✅
+
+```
+LazyVerticalGrid(
+    columns = GridCells.Fixed(columnsCount),
+    modifier = Modifier
+        .fillMaxSize()
+        .padding(
+            start = dimensionResource(id = R.dimen.grid_padding_horizontal),
+            end = dimensionResource(id = R.dimen.grid_padding_horizontal),
+            bottom = dimensionResource(id = R.dimen.grid_padding_bottom)...
+```
+Ключевой элемент - нижний отступ у списка, который создает "буферную зону" внизу списка. 
+```
+FloatingActionButton(
+            onClick = { count.intValue++ },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)...
+```
+FAB позиционируется абсолютно - всегда видна, но не мешает контенту
+
+### 4. Переворот экрана не сбивает количество прямоугольников. ✅
+
+```
+val count = rememberSaveable { mutableIntStateOf(0) }
+```
+rememberSaveable — это как remember, но с дополнительной возможностью сохранять значение при пересоздании Activity(при перевороте экрана).
+rememberSaveable отлично подходит для нас, так как mutableIntStateOf может быть положен в Bundle(Bundle умеет сохранять только простые типы (Int, String, Boolean, ArrayList и т.п.). mutableIntStateOf просто оборачивает Int.
+
+### 5. Бонус: Сделать квадратики, а не прямоугольники. ✅
+
+```
+Box(
+        modifier = modifier
+            .aspectRatio(1f)...
+```
+Modifier.aspectRatio() - Высота и ширина элемента должны быть связаны в заданной пропорции. 1f - это 1:1.
+
+## Реализация пункта "Ограничения и требования"
+
+1. Нельзя использовать персистентное хранилище (Никаких записей в файловую систему, никаких записей в SharedPreferences). ✅
+2. Приложение не должно использовать доступ в интернет и манифест не должен содержать uses-permission INTERNET. ✅
+3. Приложение не должно содержать хардкод. ✅
+4. Приложение должно использовать ресурсы(resources) для работы. ✅
+5. В коде можно оставлять комментарии, но в конечной версии нельзя оставлять Log. ✅
+
+## Дополнительные решения.
+
+1. Нумерация с 1.
+2. Скругление элементов(выглядит эстетичнее).
+3. Использование FAB(FloatingActionButton). Хотелось приблизится к примеру в задании.
+4. Использование windowInsetsPadding(WindowInsets.statusBars) - модификатор в Jetpack Compose, который добавляет отступы для статус-бара или выреза камеры. Зачем? Чтобы контент не залезал под системный статус-бар. Внизу это не необходимо, так как мы всё равно делаем "буферную зону" внизу списка для FAB.
