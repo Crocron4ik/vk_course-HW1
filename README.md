@@ -141,3 +141,47 @@ Modifier.aspectRatio() - Высота и ширина элемента долж�
 2. Скругление элементов(выглядит эстетичнее).
 3. Использование FAB(FloatingActionButton). Хотелось приблизится к примеру в задании.
 4. Использование windowInsetsPadding(WindowInsets.statusBars) - модификатор в Jetpack Compose, который добавляет отступы для статус-бара или выреза камеры. Зачем? Чтобы контент не залезал под системный статус-бар. Внизу это не необходимо, так как мы всё равно делаем "буферную зону" внизу списка для FAB.
+
+
+# Модификация
+
+### Постановка задачи
+
+При клике на последний квадратик, он должен удаляться.
+
+### Реализация
+
+```
+Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.square_corner_radius)))
+            .background(color)
+            .clickable {
+                lastClick()
+            }
+```
+Элементам(боксам) добавила кликабельность.
+
+```
+fun NumberSquare(
+    number: Int,
+    lastClick: () -> Unit,
+    modifier: Modifier = Modifier
+```
+Передала внутрь квадратиков функцию, которая
+```
+ {
+            items(count.intValue, key = { it }) { item ->
+                val number = item + 1
+                val isLast = number == count.intValue
+                NumberSquare(
+                    number = number,
+                    lastClick = {
+                        if (isLast) {
+                            count.intValue--
+                        }
+                    })
+            }
+```
+проверяет совпадение номера квадратика(нумерация с 1) с количеством элементов и если это последний квадратик убавляет count.intValue.
