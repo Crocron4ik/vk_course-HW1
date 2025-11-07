@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="grid_padding_horizontal">16dp</dimen>
+    <dimen name="grid_padding_bottom">80dp</dimen>
+    <dimen name="grid_spacing">8dp</dimen>
+    <dimen name="fab_padding">16dp</dimen>
+    <dimen name="square_corner_radius">8dp</dimen>
+
+    <dimen name="square_text_size">24sp</dimen>
+</resources>
