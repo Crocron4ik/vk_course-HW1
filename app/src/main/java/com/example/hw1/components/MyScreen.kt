@@ -58,7 +58,14 @@ fun MyScreen() {
         ) {
             items(count.intValue, key = { it }) { item ->
                 val number = item + 1
-                NumberSquare(number = number)
+                val isLast = number == count.intValue
+                NumberSquare(
+                    number = number,
+                    lastClick = {
+                        if (isLast) {
+                            count.intValue--
+                        }
+                    })
             }
         }
         FloatingActionButton(
