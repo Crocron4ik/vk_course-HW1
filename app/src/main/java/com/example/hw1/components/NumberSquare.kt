@@ -1,6 +1,7 @@
 package com.example.hw1.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import com.example.hw1.R
 @Composable
 fun NumberSquare(
     number: Int,
+    lastClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isEven = number % 2 == 0
@@ -33,6 +35,9 @@ fun NumberSquare(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.square_corner_radius)))
             .background(color)
+            .clickable {
+                lastClick()
+            }
     ) {
         Text(
             text = number.toString(),
